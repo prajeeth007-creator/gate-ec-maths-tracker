@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#c62828">
+<meta name="description" content="A simple GATE 2027 EC Engineering Mathematics checklist and progress tracker.">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="manifest" href="./manifest.json">
+<title>GATE EC Maths Tracker</title>
+<style>
+  :root {
+    --bg: #f7f7f8; --card: #ffffff; --ink: #202127; --muted: #70727c;
+    --line: #e6e7eb; --accent: #c62828; --accent-soft: #fff0f0;
+    --done: #247a4b; --done-soft: #eaf7ef;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  button, input { font: inherit; }
+  button { cursor: pointer; }
+  .app { width: min(100%, 1050px); margin: 0 auto; padding: 22px 18px 36px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .eyebrow { color: var(--muted); font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  h1 { margin: 5px 0 0; font-size: clamp(1.45rem, 4vw, 2rem); letter-spacing: -.04em; }
+  .sub { margin: 7px 0 0; color: var(--muted); font-size: .95rem; }
+  .hero { display: grid; grid-template-columns: 1fr 112px 1fr; align-items: center; gap: 14px; padding: 17px 20px; margin: 18px 0 22px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); }
+  .hero-label { color: var(--muted); font-size: .8rem; }
+  .hero-number { font-size: 1.6rem; font-weight: 800; margin-top: 3px; }
+  .hero-right { text-align: right; }
+  .spider-wrap { width: 94px; height: 94px; display: grid; place-items: center; border-radius: 50%; background: #17181d; margin: auto; }
+  .spider-wrap svg { width: 66px; height: 66px; }
+  .progress-track { width: 100%; height: 8px; background: #ececf0; overflow: hidden; border-radius: 99px; margin-top: 12px; }
+  .progress-fill { width: 0%; height: 100%; background: var(--accent); border-radius: 99px; transition: width .2s ease; }
+  .section-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin: 0 2px 12px; }
+  h2 { margin: 0; font-size: 1.12rem; }
+  .small-muted { color: var(--muted); font-size: .82rem; }
+  .topics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .topic-card { text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 15px; padding: 16px; min-height: 155px; color: inherit; transition: border-color .15s, transform .15s; }
+  .topic-card:hover { border-color: #c6c7ce; transform: translateY(-1px); }
+  .topic-card:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #d9a0a0; outline-offset: 2px; }
+  .topic-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: #f1f1f4; font-size: 1.35rem; margin-bottom: 13px; }
+  .topic-name { display: block; font-weight: 750; font-size: .98rem; line-height: 1.3; }
+  .topic-count { display: block; color: var(--muted); font-size: .8rem; margin-top: 5px; }
+  .mini-track { height: 5px; border-radius: 99px; background: #ededf0; margin-top: 13px; overflow: hidden; }
+  .mini-fill { height: 100%; width: 0; background: var(--done); border-radius: 99px; }
+  .topic-card.complete .topic-icon { background: var(--done-soft); }
+  .topic-card.complete .topic-count { color: var(--done); }
+  .view { display: none; }
+  .view.active { display: block; }
+  .back { border: 1px solid var(--line); background: var(--card); padding: 9px 12px; border-radius: 10px; color: var(--ink); margin-bottom: 16px; }
+  .detail-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 16px; }
+  .detail-title { font-size: clamp(1.3rem, 4vw, 1.8rem); margin: 0; letter-spacing: -.03em; }
+  .detail-desc { color: var(--muted); margin: 6px 0 0; font-size: .9rem; }
+  .detail-progress { min-width: 105px; text-align: right; color: var(--muted); font-size: .84rem; }
+  .checklist { background: var(--card); border: 1px solid var(--line); border-radius: 15px; overflow: hidden; }
+  .lesson-group + .lesson-group { border-top: 1px solid var(--line); }
+  .lesson-name { margin: 0; padding: 14px 16px 8px; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .07em; font-weight: 750; }
+  .check-row { display: flex; align-items: start; gap: 12px; padding: 12px 16px; cursor: pointer; line-height: 1.45; }
+  .check-row:hover { background: #fafafd; }
+  .check-row input { width: 19px; height: 19px; flex: 0 0 19px; margin: 1px 0 0; accent-color: var(--done); }
+  .check-row span { flex: 1; font-size: .94rem; }
+  .check-row input:checked + span { color: var(--muted); text-decoration: line-through; }
+  .detail-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 14px; }
+  .text-button { border: 0; background: transparent; color: var(--muted); padding: 8px 0; font-size: .84rem; text-decoration: underline; text-underline-offset: 3px; }
+  .footer-note { text-align: center; color: var(--muted); font-size: .78rem; margin-top: 24px; }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); padding: 10px 14px; border-radius: 10px; background: #202127; color: white; font-size: .86rem; display: none; max-width: calc(100% - 28px); }
+  @media (max-width: 680px) {
+    .app { padding: 17px 13px 28px; }
+    .hero { grid-template-columns: 1fr 76px 1fr; padding: 14px 12px; gap: 8px; }
+    .spider-wrap { width: 70px; height: 70px; }
+    .spider-wrap svg { width: 49px; height: 49px; }
+    .hero-number { font-size: 1.3rem; }
+    .hero-label { font-size: .72rem; }
+    .topics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .topic-card { padding: 13px; min-height: 145px; }
+    .topic-name { font-size: .9rem; }
+  }
+  @media (max-width: 360px) {
+    .hero { grid-template-columns: 1fr 58px 1fr; }
+    .spider-wrap { width: 56px; height: 56px; }
+    .spider-wrap svg { width: 40px; height: 40px; }
+    .topic-card { padding: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <div class="eyebrow">GATE 2027 · EC</div>
+      <h1>Maths Learning Tracker</h1>
+      <p class="sub">One topic at a time. Every tick is progress.</p>
+    </div>
+  </header>
+
+  <section id="homeView" class="view active">
+    <div class="hero">
+      <div>
+        <div class="hero-label">Topics completed</div>
+        <div class="hero-number" id="overallCount">0 / 0</div>
+        <div class="small-muted" id="overallPercent">0% complete</div>
+      </div>
+      <div class="spider-wrap" title="A little reminder to keep going">
+        <!-- Original simple spider emblem, not an official character logo -->
+        <svg viewBox="0 0 100 100" aria-label="Spider emblem" role="img" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M50 35 L50 18 M50 65 L50 82 M35 43 L18 32 L10 20 M34 51 L14 51 L6 60 M37 61 L20 76 L12 89 M65 43 L82 32 L90 20 M66 51 L86 51 L94 60 M63 61 L80 76 L88 89"/>
+          <path d="M50 32 C39 32 31 41 33 51 C34 61 42 67 50 70 C58 67 66 61 67 51 C69 41 61 32 50 32 Z" fill="#c62828"/>
+          <path d="M50 35 L50 67 M36 42 L64 60 M64 42 L36 60" stroke-width="2.5"/>
+          <circle cx="44" cy="45" r="2" fill="#fff" stroke="none"/><circle cx="56" cy="45" r="2" fill="#fff" stroke="none"/>
+        </svg>
+      </div>
+      <div class="hero-right">
+        <div class="hero-label">Your progress</div>
+        <div class="hero-number" id="overallPercentBig">0%</div>
+        <div class="small-muted">Keep showing up.</div>
+      </div>
+      <div class="progress-track" style="grid-column:1 / -1; margin-top:0"><div class="progress-fill" id="overallBar"></div></div>
+    </div>
+    <div class="section-head">
+      <h2>Choose a subject</h2>
+      <span class="small-muted">6 syllabus areas</span>
+    </div>
+    <div class="topics" id="topicGrid"></div>
+  </section>
+
+  <section id="detailView" class="view">
+    <button class="back" id="backButton">← All subjects</button>
+    <div class="detail-head">
+      <div>
+        <h2 class="detail-title" id="detailTitle"></h2>
+        <p class="detail-desc">Tick each concept when you've learned and practised it.</p>
+      </div>
+      <div class="detail-progress"><strong id="detailCount">0 / 0</strong><div id="detailPercent">0% complete</div></div>
+    </div>
+    <div class="progress-track" style="margin:0 0 15px"><div class="progress-fill" id="detailBar"></div></div>
+    <div class="checklist" id="checklist"></div>
+    <div class="detail-actions">
+      <button class="text-button" id="uncheckButton">Uncheck all in this subject</button>
+      <button class="text-button" id="resetAllButton">Reset all progress</button>
+    </div>
+  </section>
+  <div class="footer-note">Your checklist is saved in this browser on this device. For safety, keep a backup if you clear browser data.</div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+const subjects = [
+  {
+    id: "linear", name: "Linear Algebra", icon: "▦",
+    groups: [
+      ["Foundations", ["Vectors and basic matrix operations", "Matrix addition, multiplication and transpose", "Determinants and inverse of a matrix"]],
+      ["Core syllabus", ["Vector spaces", "Linear dependence and independence", "Basis and dimension", "Rank of a matrix", "Systems of linear equations", "Existence and uniqueness of solutions", "Eigenvalues and eigenvectors"]]
+    ]
+  },
+  {
+    id: "calculus", name: "Calculus", icon: "∫",
+    groups: [
+      ["Foundations", ["Functions, limits and continuity", "Differentiation and rules of derivatives", "Integration and rules of integration"]],
+      ["Core syllabus", ["Mean value theorems", "Theorems of integral calculus", "Evaluation of definite integrals", "Improper integrals", "Partial derivatives", "Maxima and minima", "Multiple integrals", "Line integrals", "Surface integrals", "Volume integrals", "Taylor series"]]
+    ]
+  },
+  {
+    id: "diff", name: "Differential Equations", icon: "𝑑𝑦",
+    groups: [
+      ["Foundations", ["Basic definitions: order and degree", "First-order differential equations"]],
+      ["Core syllabus", ["Linear differential equations", "Complementary function (CF)", "Particular integral (PI)", "Nonhomogeneous equations", "Euler–Cauchy equations", "Variation of parameters", "Partial differential equations (PDEs)", "Variable separable method", "Initial value problems", "Boundary value problems"]]
+    ]
+  },
+  {
+    id: "vector", name: "Vector Analysis", icon: "⃗",
+    groups: [
+      ["Foundations", ["Vectors in 2D and 3D", "Vector operations", "Dot product and cross product"]],
+      ["Core syllabus", ["Gradient", "Divergence", "Curl", "Gauss's theorem", "Green's theorem", "Stokes' theorem"]]
+    ]
+  },
+  {
+    id: "complex", name: "Complex Analysis", icon: "ℂ",
+    groups: [
+      ["Foundations", ["Complex numbers and complex functions"]],
+      ["Core syllabus", ["Analytic functions", "Sequences and series", "Convergence tests", "Taylor series", "Laurent series", "Cauchy's integral theorem", "Cauchy's integral formula", "Residue theorem"]]
+    ]
+  },
+  {
+    id: "prob", name: "Probability & Statistics", icon: "∑",
+    groups: [
+      ["Foundations", ["Mean, median and mode", "Variance and standard deviation", "Counting and combinatorial probability", "Basic probability rules"]],
+      ["Core syllabus", ["Joint and conditional probability", "Probability distributions", "Binomial distribution", "Poisson distribution", "Exponential distribution", "Normal distribution", "Correlation and regression analysis"]]
+    ]
+  }
+];
+const storageKey = "gate-ec-maths-tracker-v1";
+let progress = {};
+let currentSubject = null;
+try {
+  const saved = localStorage.getItem(storageKey);
+  if (saved) progress = JSON.parse(saved) || {};
+} catch (e) {
+  showToast("Browser storage is unavailable. Progress may not be saved.");
+}
+function allItems(subject) { return subject.groups.flatMap(g => g[1]); }
+function isDone(id, item) { return !!(progress[id] && progress[id][item]); }
+function saveProgress() {
+  try { localStorage.setItem(storageKey, JSON.stringify(progress)); }
+  catch (e) { showToast("Could not save progress in this browser."); }
+}
+function stats(subject) {
+  const items = allItems(subject), done = items.filter(item => isDone(subject.id, item)).length;
+  return { done, total: items.length, pct: items.length ? Math.round(done / items.length * 100) : 0 };
+}
+function overallStats() {
+  const all = subjects.flatMap(s => allItems(s).map(item => [s.id, item]));
+  const done = all.filter(([id, item]) => isDone(id, item)).length;
+  return { done, total: all.length, pct: all.length ? Math.round(done / all.length * 100) : 0 };
+}
+function renderHome() {
+  const grid = document.getElementById("topicGrid");
+  grid.innerHTML = "";
+  subjects.forEach(subject => {
+    const s = stats(subject);
+    const button = document.createElement("button");
+    button.className = "topic-card" + (s.pct === 100 ? " complete" : "");
+    button.type = "button";
+    button.setAttribute("aria-label", `${subject.name}: ${s.done} of ${s.total} complete`);
+    button.innerHTML = `<span class="topic-icon" aria-hidden="true">${subject.icon}</span><span class="topic-name">${subject.name}</span><span class="topic-count">${s.done} of ${s.total} concepts · ${s.pct}%</span><div class="mini-track"><div class="mini-fill" style="width:${s.pct}%"></div></div>`;
+    button.addEventListener("click", () => openSubject(subject.id));
+    grid.appendChild(button);
+  });
+  const o = overallStats();
+  document.getElementById("overallCount").textContent = `${o.done} / ${o.total}`;
+  document.getElementById("overallPercent").textContent = `${o.pct}% complete`;
+  document.getElementById("overallPercentBig").textContent = `${o.pct}%`;
+  document.getElementById("overallBar").style.width = `${o.pct}%`;
+}
+function openSubject(id) {
+  currentSubject = subjects.find(s => s.id === id);
+  document.getElementById("homeView").classList.remove("active");
+  document.getElementById("detailView").classList.add("active");
+  document.getElementById("detailTitle").textContent = currentSubject.name;
+  renderChecklist();
+  window.scrollTo({top: 0, behavior: "auto"});
+}
+function renderChecklist() {
+  if (!currentSubject) return;
+  const container = document.getElementById("checklist");
+  container.innerHTML = "";
+  currentSubject.groups.forEach(([groupName, items]) => {
+    const group = document.createElement("section");
+    group.className = "lesson-group";
+    const heading = document.createElement("h3");
+    heading.className = "lesson-name";
+    heading.textContent = groupName;
+    group.appendChild(heading);
+    items.forEach(item => {
+      const label = document.createElement("label");
+      label.className = "check-row";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = isDone(currentSubject.id, item);
+      input.addEventListener("change", () => {
+        if (!progress[currentSubject.id]) progress[currentSubject.id] = {};
+        progress[currentSubject.id][item] = input.checked;
+        saveProgress();
+        renderChecklist();
+        renderHome();
+      });
+      const text = document.createElement("span");
+      text.textContent = item;
+      label.append(input, text);
+      group.appendChild(label);
+    });
+    container.appendChild(group);
+  });
+  const s = stats(currentSubject);
+  document.getElementById("detailCount").textContent = `${s.done} / ${s.total}`;
+  document.getElementById("detailPercent").textContent = `${s.pct}% complete`;
+  document.getElementById("detailBar").style.width = `${s.pct}%`;
+}
+document.getElementById("backButton").addEventListener("click", () => {
+  document.getElementById("detailView").classList.remove("active");
+  document.getElementById("homeView").classList.add("active");
+  currentSubject = null;
+  renderHome();
+  window.scrollTo({top: 0, behavior: "auto"});
+});
+document.getElementById("uncheckButton").addEventListener("click", () => {
+  if (!currentSubject || !confirm(`Uncheck all concepts in ${currentSubject.name}?`)) return;
+  progress[currentSubject.id] = {};
+  saveProgress(); renderChecklist(); renderHome();
+});
+document.getElementById("resetAllButton").addEventListener("click", () => {
+  if (!confirm("Reset all progress across all six subjects? This cannot be undone.")) return;
+  progress = {}; saveProgress(); renderChecklist(); renderHome(); showToast("All progress has been reset.");
+});
+let toastTimer;
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message; toast.style.display = "block";
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.style.display = "none", 2600);
+}
+renderHome();
+
+// Enables offline caching when this app is hosted on HTTPS (for example, GitHub Pages).
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
